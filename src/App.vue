@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <m-header>傻京 Music</m-header>
+    <m-header>Music</m-header>
     <div class="tab-wrapper">
       <tab :tabs = "tabs"></tab>
     </div>
