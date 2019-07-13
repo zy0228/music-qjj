@@ -11,11 +11,8 @@ export default {
     return {
     }
   },
-  created() {
-    this._getSingerList()
-  },
   methods: {
-    _getSingerList() {
+    fetch() {
       getSingerList().then(res => {
         if (res.code === ERR_OK) {
           console.log(res.data)

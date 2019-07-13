@@ -2,7 +2,7 @@
   <div class="tab">
     <cube-tab-bar
       :useTransition=false
-      :showSlider=false
+      :showSlider=true
       v-model="selectedLabel"
       :data="tabs"
       ref="tabBar"

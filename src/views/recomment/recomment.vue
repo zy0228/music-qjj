@@ -48,22 +48,17 @@ export default {
     }
   },
   created() {
-    this._getRecommend()
-
-    this._getDiscList()
   },
   methods: {
-    _getRecommend() {
-      getRecommend().then(res => {
-        if (res.code === ERR_OK) {
-          this.recommends = res.data.slider
-        }
-      })
-    },
-    _getDiscList() {
+    fetch() {
       getDiscList().then(res => {
         if (res.code === ERR_OK) {
           this.discList = res.data.list
+        }
+      })
+      getRecommend().then(res => {
+        if (res.code === ERR_OK) {
+          this.recommends = res.data.slider
         }
       })
     },

@@ -11,3 +11,7 @@ export const options = {
 }
 
 export const ERR_OK = 0
+
+export const singerType = {
+  key: 'all_all_all'
+}

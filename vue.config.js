@@ -51,6 +51,22 @@ module.exports = {
           console.log(e)
         })
       })
+
+      app.get('/getSingers', (req, res) => {
+        let url = 'https://c.y.qq.com/v8/fcg-bin/v8.fcg'
+
+        axios.get(url, {
+          headers: {
+            referer: 'https://music.dawkey.top/',
+            origin: 'https://y.qq.com'
+          },
+          params: req.query
+        }).then(response => {
+          res.json(response.data)
+        }).catch(e => {
+          console.log(e)
+        })
+      })
     }
   }
 }
