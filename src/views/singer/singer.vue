@@ -1,11 +1,15 @@
 <template>
-  <div>singer</div>
+  <div class="singer">
+    <list-view class="singer-list" :data="singerData">
+    </list-view>
+  </div>
 </template>
 
 <script>
 import { getSingerList } from 'api/singer'
 import { ERR_OK } from 'api/config'
 import Singer from 'common/js/singer'
+import ListView from 'base/listview/listview'
 
 const HOT_NAME = '热门'
 const HOT_SINGER_LEN = 10
@@ -15,6 +19,8 @@ export default {
     return {
       singerData: []
     }
+  },
+  created() {
   },
   methods: {
     fetch() {
@@ -29,7 +35,7 @@ export default {
     _normalizeSinger(list) {
       let map = {
         hot: {
-          name: HOT_NAME,
+          title: HOT_NAME,
           items: []
         }
       }
@@ -43,7 +49,7 @@ export default {
         const key = item.Findex
         if (!map[key]) {
           map[key] = {
-            name: key,
+            title: key,
             items: []
           }
         }
@@ -57,18 +63,29 @@ export default {
       let ret = []
       for (let key in map) {
         let val = map[key]
-        if (val.name.match(/[a-zA-Z]/)) {
+        if (val.title.match(/[a-zA-Z]/)) {
           ret.push(val)
-        } else if (val.name === HOT_NAME) {
+        } else if (val.title === HOT_NAME) {
           hot.push(val)
         }
-        ret.sort((a, b) => a.name.charCodeAt(0) - b.name.charCodeAt(0))
+        ret.sort((a, b) => a.title.charCodeAt(0) - b.title.charCodeAt(0))
       }
       return hot.concat(ret)
     }
+  },
+  components: {
+    ListView
   }
 }
 
 </script>
 <style lang='stylus' scoped>
+@import 'common/stylus/variable'
+
+.singer
+  position relative
+  height 100%
+  overflow hidden
+  .singer-list
+    height 100%
 </style>
