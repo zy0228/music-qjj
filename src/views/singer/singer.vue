@@ -28,7 +28,6 @@ export default {
         if (res.code === ERR_OK) {
           let singers = res.data.list
           this.singerData = this._normalizeSinger(singers)
-          console.log(this.singerData)
         }
       })
     },
