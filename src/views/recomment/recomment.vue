@@ -1,12 +1,19 @@
 <template>
   <div class="recommend">
-    <scroll ref="scroll" class="recommend-content" :data="discList">
+    <scroll
+      ref="scroll"
+      class="recommend-content"
+      :data="discList"
+    >
       <div>
         <div class="slide-wrapper" v-if="recommends.length">
           <slide>
             <div v-for="(item, index) in recommends" :key="index">
               <a :href="item.linkUrl">
-                <img @load="imgLoad" :src="item.picUrl" alt="">
+                <img
+                  @load="imgLoad"
+                  :src="item.picUrl"
+                >
               </a>
             </div>
           </slide>
@@ -48,9 +55,10 @@ export default {
     }
   },
   created() {
+    this._getRecommend()
   },
   methods: {
-    fetch() {
+    _getRecommend() {
       getDiscList().then(res => {
         if (res.code === ERR_OK) {
           this.discList = res.data.list
@@ -81,8 +89,10 @@ export default {
 @import 'common/stylus/variable'
 
 .recommend
-  position: relative
-  height: 100%
+  position: fixed
+  width : 100%
+  top: 88px
+  bottom: 0
   .recommend-content
     height: 100%
     overflow: hidden

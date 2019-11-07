@@ -1,16 +1,17 @@
 <template>
-  <scroll class="listViewWrapper"
-          :data="data"
-          ref="listview"
-          :listenScroll="listenScroll"
-          :probeType="probeType"
-          @scroll="scroll"
+  <scroll
+    class="listViewWrapper"
+    :data="data"
+    ref="listview"
+    :listenScroll="listenScroll"
+    :probeType="probeType"
+    @scroll="scroll"
   >
     <ul>
       <li v-for="(group, index) in data" :key="index" class="list-group" ref="listgroup">
         <h2 class="list-group-title">{{group.title}}</h2>
         <ul>
-          <li v-for="(item, indexs) in group.items" :key="indexs" class="list-group-item">
+          <li @click="selectItem(item)" v-for="(item, indexs) in group.items" :key="indexs" class="list-group-item">
             <img class="avatar" v-lazy="item.avatar"/>
             <span class="name">{{item.name}}</span>
           </li>
@@ -31,11 +32,15 @@
     <div class="list-fixed" v-show="fixedTitle" ref="fixed">
       <h1 class="fixed-title">{{fixedTitle}}</h1>
     </div>
+    <div v-show="!data.length" class="loading-container">
+      <loading></loading>
+    </div>
   </scroll>
 </template>
 
 <script>
 import Scroll from 'base/scroll/scroll'
+import Loading from 'base/loading/loading'
 import { getData } from 'common/js/dom'
 
 const ANCHOR_HEIGHT = 18
@@ -75,6 +80,9 @@ export default {
     }
   },
   methods: {
+    selectItem(item) {
+      this.$emit('select', item)
+    },
     onShortcutTouchStart(e) {
       let anchorIndex = getData(e.target, 'index')
       let firstTouch = e.touches[0]
@@ -153,7 +161,8 @@ export default {
     }
   },
   components: {
-    Scroll
+    Scroll,
+    Loading
   }
 }
 
@@ -162,9 +171,8 @@ export default {
 @import "common/stylus/variable"
 
   .listViewWrapper
-    position: relative
+    position: fixed
     width: 100%
-    height: 100%
     overflow: hidden
     background: $color-background
     .list-group

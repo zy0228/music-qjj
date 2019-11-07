@@ -52,8 +52,8 @@ export default {
   },
   methods: {
     _setSlideWidth(isResize) {
-      this.children = this.$refs.slideGroup.children
       let slideWidth = this.$refs.slide.clientWidth
+      this.children = this.$refs.slideGroup.children
       let width = 0
       for (let i = 0; i < this.children.length; i++) {
         let child = this.children[i]

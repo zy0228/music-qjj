@@ -1,4 +1,5 @@
-import { commonParams, singerType } from './config'
+import { commonParams, singerType, options } from './config'
+import jsonp from 'common/js/jsonp'
 import axios from 'axios'
 
 export function getSingerList () {
@@ -24,4 +25,21 @@ export function getSingerList () {
   }).catch(e => {
     console.log(e)
   })
+}
+
+export function getSingerDetail(singerId) {
+  let url = 'https://c.y.qq.com/v8/fcg-bin/fcg_v8_singer_track_cp.fcg'
+  let data = Object.assign({}, commonParams, {
+    platform: 'yqq',
+    needNewCode: 0,
+    loginUin: 0,
+    hostUin: 0,
+    order: 'listen',
+    begin: 0,
+    num: 100,
+    songstatus: 1,
+    singermid: singerId
+  })
+
+  return jsonp(url, data, options)
 }

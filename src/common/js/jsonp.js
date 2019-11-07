@@ -15,9 +15,14 @@ export default function jsonp(url, data, option) {
 
 function param(data) {
   let url = ''
-  for (let k in data) {
-    let values = data[k] !== undefined ? data[k] : ''
-    url += `&${k} = ${encodeURIComponent(values)}`
+  if (typeof data === 'object') {
+    for (let k in data) {
+      let values = data[k] !== undefined ? data[k] : ''
+      // 这个地方吃了一次亏就是编码习惯符号前后空格 这里随手加了导致url里空格会转译成%20
+      url += `&${k}=${encodeURIComponent(values)}`
+    }
+    return url ? url.substring(1) : ''
+  } else {
+    throw new TypeError('arguments type of error')
   }
-  return url ? url.substring(1) : ''
 }
