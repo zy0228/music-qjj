@@ -23,15 +23,15 @@ export default {
   },
   methods: {
     getDesc(song) {
-      return `${song.singer}——${song.album}`
+      return `${song.singer}·${song.album}`
     }
   }
 }
 </script>
 
-<style lang="stylus" scoped>
-@import 'common/stylus/variable'
-@import 'common/stylus/mixin'
+<style lang='stylus' scoped>
+@import '~common/stylus/variable'
+@import '~common/stylus/mixin'
 
 .song-list
   .item
@@ -45,10 +45,10 @@ export default {
       line-height 20px
       overflow hidden
       .name
-        no-warp()
+        no-wrap()
         color $color-text
       .desc
-        no-warp()
+        no-wrap()
         margin-top 4px
-        color $font-text-d
+        color $color-text-d
 </style>

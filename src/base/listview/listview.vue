@@ -1,6 +1,6 @@
 <template>
   <scroll
-    class="listViewWrapper"
+    class="listview"
     :data="data"
     ref="listview"
     :listenScroll="listenScroll"
@@ -170,9 +170,10 @@ export default {
 <style lang='stylus' scoped>
 @import "common/stylus/variable"
 
-  .listViewWrapper
-    position: fixed
+  .listview
+    position: relative
     width: 100%
+    height 100%
     overflow: hidden
     background: $color-background
     .list-group

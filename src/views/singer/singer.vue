@@ -1,12 +1,13 @@
 <template>
   <div class="singer">
     <list-view
-      class="singer-list"
       :data="singerData"
       @select="selectSinger"
     >
     </list-view>
-    <router-view></router-view>
+    <transition name="slide">
+        <router-view></router-view>
+    </transition>
   </div>
 </template>
 
@@ -98,9 +99,12 @@ export default {
 @import 'common/stylus/variable'
 
 .singer
-  position relative
-  height 100%
-  overflow hidden
-  .singer-list
-    height 100%
+  position fixed
+  top: 88px
+  bottom: 0
+  width: 100%
+  .slide-enter-active, .slide-leave-active
+    transition all .3s
+  .slide-enter, .slide-leave-to
+    transform translate3d(100%, 0, 0)
 </style>

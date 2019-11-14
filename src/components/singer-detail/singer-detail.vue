@@ -1,12 +1,10 @@
 <template>
-  <transition name="slid">
-    <music-list
-      :songs="songs"
-      :title="title"
-      :bg-image="bgImage"
-    >
-    </music-list>
-  </transition>
+  <music-list
+    :songs="songs"
+    :title="title"
+    :bg-image="bgImage"
+  >
+  </music-list>
 </template>
 
 <script>
@@ -43,7 +41,6 @@ export default {
       getSingerDetail(this.singer.id).then(res => {
         if (res.code === ERR_OK) {
           this.songs = this._normalizeSongs(res.data.list)
-          console.log(this.songs)
         }
       })
     },
@@ -65,7 +62,4 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-@import '~common/stylus/variable'
-
-
 </style>
