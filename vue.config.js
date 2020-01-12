@@ -66,6 +66,31 @@ module.exports = {
           console.log(e)
         })
       })
+
+      /**
+       * 获取vkey
+       * 抓的黄老的接口，嘿嘿
+       */
+      app.get('/getVkey', (req, res) => {
+        let url = 'http://ustbhuangyi.com/music/api/getPurlUrl'
+        let request = req.query
+        let formatParams = {}
+
+        // 将req.query 转换为一个字典
+        for (let key in request) {
+          formatParams[key] = JSON.parse(request[key])
+        }
+
+        axios.post(url, formatParams, {
+          headers: {
+            referer: 'http://ustbhuangyi.com/music/',
+            origin: 'http://ustbhuangyi.com',
+            Host: 'ustbhuangyi.com'
+          }
+        }).then(response => {
+          res.json(response.data)
+        }).catch(e => { console.log(e) })
+      })
     }
   }
 }

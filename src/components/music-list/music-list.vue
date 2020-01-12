@@ -6,7 +6,7 @@
     <h1 class="title" v-html="title"></h1>
     <div class="bg-image" :style="bgStyle" ref="bgImage">
       <div class="play-wrapper" ref="playBtn">
-        <div class="play" v-show="songs.length>0">
+        <div class="play" v-show="songs.length>0" ref="playBtn" @click="random">
           <i class="icon-play"></i>
           <span class="text">随机播放全部</span>
         </div>
@@ -37,6 +37,7 @@ import { prefixStyle } from 'common/js/dom'
 import Loading from 'base/loading/loading'
 import { mapActions } from 'vuex'
 
+const miniPlayHeight = 60
 const RESERVED_HEIGHT = 40
 const DEFAULT_BLUR = 20
 const transform = prefixStyle('transform')
@@ -76,6 +77,7 @@ export default {
     this.imageHeight = this.$refs.bgImage.clientHeight
     this.minTranslateY = -this.imageHeight + RESERVED_HEIGHT
     this.$refs.list.$el.style.top = `${this.imageHeight}px`
+    this.$refs.list.$el.style.bottom = `${miniPlayHeight}px`
   },
   methods: {
     back() {
@@ -90,8 +92,14 @@ export default {
         index
       })
     },
+    random() {
+      this.setlePlayRandom({
+        list: this.songs
+      })
+    },
     ...mapActions([
-      'selectPlay'
+      'selectPlay',
+      'setlePlayRandom'
     ])
   },
   watch: {

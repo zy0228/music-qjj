@@ -10,7 +10,7 @@
 <script>
 import MHeader from 'components/m-header/m-header'
 import MTab from 'components/m-tab/m-tab'
-import MyPlayer from 'components/MyPlayer/MyPlayer'
+import MyPlayer from 'components/my-player'
 
 export default {
   components: {
