@@ -91,6 +91,25 @@ module.exports = {
           res.json(response.data)
         }).catch(e => { console.log(e) })
       })
+
+      /**
+       * 获取歌词
+       */
+      app.get('/getLyric', (req, res) => {
+        let url = 'http://ustbhuangyi.com/music/api/lyric'
+
+        axios.get(url, {
+          headers: {
+            referer: 'https://music.dawkey.top/',
+            origin: 'https://y.qq.com'
+          },
+          params: req.query
+        }).then((response) => {
+          res.json(response.data)
+        }).catch((e) => {
+          console.log(e)
+        })
+      })
     }
   }
 }

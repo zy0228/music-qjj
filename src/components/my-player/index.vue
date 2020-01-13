@@ -237,7 +237,7 @@ export default {
       this.currentTime = e.target.currentTime
     },
     endPlay() {
-      if (this.mode = playMode.loop) {
+      if (this.mode === playMode.loop) {
         this.loop()
       } else {
         this.next()
@@ -321,6 +321,7 @@ export default {
 
       this.$nextTick(() => {
         this.$refs.audio.play()
+        this.currentSong.getLyric()
       })
     },
     playing(newPlaying) {
