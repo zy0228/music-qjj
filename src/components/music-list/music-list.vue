@@ -36,14 +36,15 @@ import SongList from 'base/song-list/song-list'
 import { prefixStyle } from 'common/js/dom'
 import Loading from 'base/loading/loading'
 import { mapActions } from 'vuex'
+import { playlistMixin } from 'common/js/mixin'
 
-const miniPlayHeight = 60
 const RESERVED_HEIGHT = 40
 const DEFAULT_BLUR = 20
 const transform = prefixStyle('transform')
 const backDrop = prefixStyle('backdrop-filter')
 
 export default {
+  mixins: [playlistMixin],
   props: {
     bgImage: {
       type: String,
@@ -77,9 +78,13 @@ export default {
     this.imageHeight = this.$refs.bgImage.clientHeight
     this.minTranslateY = -this.imageHeight + RESERVED_HEIGHT
     this.$refs.list.$el.style.top = `${this.imageHeight}px`
-    this.$refs.list.$el.style.bottom = `${miniPlayHeight}px`
   },
   methods: {
+    handlePlayList(playList) {
+      const bottom = playList.length > 0 ? '60px' : ''
+      this.$refs.list.$el.style.bottom = bottom
+      this.$refs.list.refresh()
+    },
     back() {
       this.$router.back()
     },

@@ -16,7 +16,9 @@
     "vue-lazyload": "^1.2.6",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1",
-    "circular-json-es6": "^2.0.2"
+    "circular-json-es6": "^2.0.2",
+    "js-base64": "^2.5.1",
+    "lyric-parser": "^1.0.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.5.1",

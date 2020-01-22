@@ -17,29 +17,39 @@
           <h1 class="title" v-html="currentSong.name"></h1>
           <h2 class="subtitle" v-html="currentSong.singer"></h2>
         </div>
-        <div class="middle">
+        <div
+          class="middle"
+          @touchstart.prevent="middleTouchStart"
+          @touchmove.prevent="middleTouchMove"
+          @touchend.prevent="middleTouchEnd">
           <div class="middle-l" ref="middleL">
             <div class="cd-wrapper" ref="cdWrapper">
               <div class="cd">
                 <img class="image" :class="cdCls" :src="currentSong.image">
               </div>
               <div class="playing-lyric-wrapper">
-                <div class="playing-lyric"></div>
+                <div class="playing-lyric">{{playingLyric}}</div>
               </div>
             </div>
           </div>
-          <div class="middle-r" ref="lyricList">
+          <scroll class="middle-r" ref="lyricList" :data="currentLyric && currentLyric.lines">
             <div class="lyric-wrapper">
-              <div>
-                <p ref="lyricLine" class="text"></p>
+              <div v-if="currentLyric">
+                <p
+                  ref="lyricLine"
+                  class="text"
+                  :class="{'current': currentLineNum === index}"
+                  v-for="(line, index) in currentLyric.lines"
+                  :key="index"
+                >{{line.txt}}</p>
               </div>
             </div>
-          </div>
+          </scroll>
         </div>
         <div class="bottom">
           <div class="dot-wrapper">
-            <span class="dot"></span>
-            <span class="dot"></span>
+            <span class="dot" :class="{'active': currentShow==='cd'}"></span>
+            <span class="dot" :class="{'active': currentShow==='lyric'}"></span>
           </div>
           <div class="progress-wrapper">
             <span class="time time-l">
@@ -102,17 +112,24 @@ import { playMode } from 'common/js/config'
 import { mapGetters, mapMutations } from 'vuex'
 import ProgressBar from 'components/progress-bar'
 import ProgressCircle from 'components/progress-circle'
+import Lyric from 'lyric-parser'
+import Scroll from 'base/scroll/scroll'
 
 const transform = prefixStyle('transform')
 const transformCssProp = transform.replace(/(.*)Transform/, '-$1-transform')
 const transition = prefixStyle('transition')
+const transitionDuration = prefixStyle('transitionDuration')
 
 export default {
   data() {
     return {
       songReady: false,
       currentTime: 0,
-      radius: 32
+      radius: 32,
+      currentLyric: null,
+      currentLineNum: 0,
+      currentShow: 'cd',
+      playingLyric: ''
     }
   },
   computed: {
@@ -144,6 +161,9 @@ export default {
       'sequenceList'
     ])
   },
+  created() {
+    this.touch = {}
+  },
   mounted() {
     this.cdWrapper = this.$refs.cdWrapper
   },
@@ -159,15 +179,19 @@ export default {
         return
       }
 
-      let currentIndex = this.currentIndex - 1
+      if (this.playList.length === 1) {
+        this.loop()
+      } else {
+        let currentIndex = this.currentIndex - 1
 
-      if (currentIndex === -1) {
-        currentIndex = this.playList.length - 1
-      }
-      this.setCurrentIndex(currentIndex)
+        if (currentIndex === -1) {
+          currentIndex = this.playList.length - 1
+        }
+        this.setCurrentIndex(currentIndex)
 
-      if (!this.playing) {
-        this.togglePlay()
+        if (!this.playing) {
+          this.togglePlay()
+        }
       }
 
       this.songReady = false
@@ -176,15 +200,18 @@ export default {
       if (!this.songReady) {
         return
       }
+      if (this.playList.length === 1) {
+        this.loop()
+      } else {
+        let currentIndex = this.currentIndex + 1
+        if (currentIndex === this.playList.length) {
+          currentIndex = 0
+        }
+        this.setCurrentIndex(currentIndex)
 
-      let currentIndex = this.currentIndex + 1
-      if (currentIndex === this.playList.length) {
-        currentIndex = 0
-      }
-      this.setCurrentIndex(currentIndex)
-
-      if (!this.playing) {
-        this.togglePlay()
+        if (!this.playing) {
+          this.togglePlay()
+        }
       }
 
       this.songReady = false
@@ -213,19 +240,24 @@ export default {
       this.cdWrapper.style[transform] = ''
     },
     leave(el, done) {
-      const { x, y, scale } = this._getPosAndTransOptions()
+      const { x, y, scale, duration, transitonFunction } = this._getPosAndTransOptions()
 
-      let force = this.cdWrapper.offsetHeight   //eslint-disable-line
-
+      this.cdWrapper.style[transition] = `${transformCssProp} ${duration} ${transitonFunction}`
       this.cdWrapper.style[transform] = `translate(${x}px, ${y}px) scale(${scale})`
+
       this.cdWrapper.addEventListener('webkitTransitionEnd', done)
     },
     afterLeave() {
       this.cdWrapper.style[transform] = ''
-      this.cdWrapper.style[transition] = ''
     },
     togglePlay() {
+      if (!this.songReady) {
+        return
+      }
       this.setPlayingState(!this.playing)
+      if (this.currentLyric) {
+        this.currentLyric.togglePlay()
+      }
     },
     canPlay() {
       this.songReady = true
@@ -246,9 +278,18 @@ export default {
     loop() {
       this.$refs.audio.currentTime = 0
       this.$refs.audio.play()
+
+      if (this.currentLyric) {
+        this.currentLyric.seek(0)
+      }
     },
     onTriggerPercent(percent) {
-      this.$refs.audio.currentTime = this.currentSong.duration * percent
+      const currentTime = this.currentSong.duration * percent
+      this.$refs.audio.currentTime = currentTime
+
+      if (this.currentLyric) {
+        this.currentLyric.seek(currentTime * 1000)
+      }
 
       if (!this.playing) {
         this.togglePlay()
@@ -272,6 +313,59 @@ export default {
       })
       return index
     },
+    middleTouchStart(e) {
+      this.touch.inital = true
+      const touch = e.touches[0]
+      this.touch.startX = touch.pageX
+      this.touch.startY = touch.pageY
+    },
+    middleTouchMove(e) {
+      if (!this.touch.inital) {
+        return
+      }
+
+      const touch = e.touches[0]
+      const deltaX = touch.pageX - this.touch.startX
+      const deltaY = touch.pageY - this.touch.startY
+      if (Math.abs(deltaY) > Math.abs(deltaX)) {
+        return
+      }
+      const left = this.currentShow === 'cd' ? 0 : -window.innerWidth
+      const offsetWidth = Math.min(0, Math.max(-window.innerWidth, left + deltaX))
+      this.touch.percent = Math.abs(offsetWidth / window.innerWidth)
+      this.$refs.lyricList.$el.style[transform] = `translate3d(${offsetWidth}px, 0, 0)`
+      this.$refs.lyricList.$el.style[transitionDuration] = 0
+      this.$refs.middleL.style['opacity'] = 1 - this.touch.percent
+      this.$refs.middleL.style[transitionDuration] = 0
+    },
+    middleTouchEnd() {
+      let offsetWidth
+      let opacity
+      let time = 300
+      if (this.currentShow === 'cd') {
+        if (this.touch.percent > 0.1) {
+          offsetWidth = -window.innerWidth
+          opacity = 0
+          this.currentShow = 'lyric'
+        } else {
+          offsetWidth = 0
+          opacity = 1
+        }
+      } else {
+        if (this.touch.percent < 0.9) {
+          offsetWidth = 0
+          opacity = 1
+          this.currentShow = 'cd'
+        } else {
+          opacity = 0
+          offsetWidth = -window.innerWidth
+        }
+      }
+      this.$refs.lyricList.$el.style[transform] = `translate3d(${offsetWidth}px, 0, 0)`
+      this.$refs.lyricList.$el.style[transitionDuration] = `${time}ms`
+      this.$refs.middleL.style.opacity = opacity
+      this.$refs.middleL.style[transitionDuration] = `${time}ms`
+    },
     format(interval) {
       interval = interval | 0
       const minute = interval / 60 | 0
@@ -292,10 +386,10 @@ export default {
       const paddingBottom = 30
       const paddingTop = 80
       const width = window.innerWidth * 0.8
+      const y = window.innerHeight - paddingTop - width / 2 - paddingBottom
       const scale = targetWidth / width
       const x = -(window.innerWidth / 2 - paddingLeft)
-      const y = window.innerHeight - paddingTop - width / 2 - paddingBottom
-      const duration = '.4s'
+      const duration = '400ms'
       const transitonFunction = 'cubic-bezier(0.86, 0.18, 0.82, 1.32)'
       return {
         x,
@@ -304,6 +398,28 @@ export default {
         duration,
         transitonFunction
       }
+    },
+    getLyric() {
+      this.currentSong.getLyric().then((lyric) => {
+        this.currentLyric = new Lyric(lyric, this.handleLyric)
+        if (this.playing) {
+          this.currentLyric.play()
+        }
+      }).catch(() => {
+        this.currentLineNum = 0
+        this.playingLyric = ''
+        this.currentLyric = null
+      })
+    },
+    handleLyric({ lineNum, txt }) {
+      this.currentLineNum = lineNum
+      if (lineNum > 5) {
+        let ele = this.$refs.lyricLine[lineNum - 5]
+        this.$refs.lyricList.scrollToElement(ele, 1000)
+      } else {
+        this.$refs.lyricList.scrollTo(0, 0, 500)
+      }
+      this.playingLyric = txt
     },
     ...mapMutations({
       setFullScreen: 'SET_FULL_SCREEN',
@@ -319,10 +435,14 @@ export default {
         return
       }
 
-      this.$nextTick(() => {
+      if (this.currentLyric) {
+        this.currentLyric.stop()
+      }
+
+      setTimeout(() => {
         this.$refs.audio.play()
-        this.currentSong.getLyric()
-      })
+        this.getLyric()
+      }, 1000)
     },
     playing(newPlaying) {
       const audio = this.$refs.audio
@@ -333,7 +453,8 @@ export default {
   },
   components: {
     ProgressBar,
-    ProgressCircle
+    ProgressCircle,
+    Scroll
   }
 }
 </script>
@@ -433,7 +554,7 @@ export default {
             line-height 20px
             font-size $font-size-medium
             color $color-text-l
-      .middler-r
+      .middle-r
         display: inline-block
         vertical-align: top
         width: 100%
@@ -513,12 +634,12 @@ export default {
       .top, .bottom
         transition: all 0.4s cubic-bezier(0,.41,0,1)
     &.normal-enter, &.normal-leave-to
-      // opacity: 0
-      // .top
-      //   transform: translate3d(0, -100px, 0)
-      // .bottom
-      //   transform: translate3d(0, 100px, 0)
-      transform translate3d(0, 100%, 0)
+      opacity: 0
+      .top
+        transform: translate3d(0, -100px, 0)
+      .bottom
+        transform: translate3d(0, 100px, 0)
+      // transform translate3d(0, 100%, 0)
   .mini-player
     display: flex
     align-items: center

@@ -8,22 +8,37 @@
     @scroll="scroll"
   >
     <ul>
-      <li v-for="(group, index) in data" :key="index" class="list-group" ref="listgroup">
+      <li
+        v-for="(group, index) in data"
+        :key="index"
+        class="list-group"
+        ref="listgroup"
+      >
         <h2 class="list-group-title">{{group.title}}</h2>
         <ul>
-          <li @click="selectItem(item)" v-for="(item, indexs) in group.items" :key="indexs" class="list-group-item">
+          <li
+            @click="selectItem(item)"
+            v-for="(item, indexs) in group.items"
+            :key="indexs"
+            class="list-group-item"
+          >
             <img class="avatar" v-lazy="item.avatar"/>
             <span class="name">{{item.name}}</span>
           </li>
         </ul>
       </li>
     </ul>
-    <div class="list-shortcut" @touchstart.stop.prevent="onShortcutTouchStart" @touchmove.stop.prevent="onShortcutTouchMove">
+    <div
+      class="list-shortcut"
+      @touchstart.stop.prevent="onShortcutTouchStart" @touchmove.stop.prevent="onShortcutTouchMove"
+    >
       <ul>
-        <li v-for="(item, index) in shortcutList"
-            :key="index" class="item"
-            :class="{'current': currentIndex===index}"
-            :data-index="index"
+        <li
+          v-for="(item, index) in shortcutList"
+          :key="index"
+          class="item"
+          :class="{'current': currentIndex===index}"
+          :data-index="index"
         >
           {{item}}
         </li>
@@ -41,7 +56,6 @@
 <script>
 import Scroll from 'base/scroll/scroll'
 import Loading from 'base/loading/loading'
-import { getData } from 'common/js/dom'
 
 const ANCHOR_HEIGHT = 18
 const TITLE_HEIGHT = 30
@@ -80,11 +94,14 @@ export default {
     }
   },
   methods: {
+    refresh() {
+      this.$refs.listview.refresh()
+    },
     selectItem(item) {
       this.$emit('select', item)
     },
     onShortcutTouchStart(e) {
-      let anchorIndex = getData(e.target, 'index')
+      let anchorIndex = e.target.dataset.index
       let firstTouch = e.touches[0]
       this.anchorIndex = anchorIndex
       this.touch.y1 = firstTouch.pageY
@@ -102,13 +119,19 @@ export default {
       this.scrollY = pos.y
     },
     _calculateHeight() {
-      this.listHeight = []
-      const list = this.$refs.listgroup
       let height = 0
+      const list = this.$refs.listgroup
+      this.listHeight = []
       this.listHeight.push(height)
       for (let i = 0; i < list.length; i++) {
         let item = list[i]
         height += item.clientHeight
+
+        /**
+         * listHeight 其实就是一个聚合了各个listgrop所处纵轴坐标范围的数组
+         * [0, 到达第一个group尾儿的PageY, 到达第二个group尾儿的PageY...]
+         * 这样的话 listHeihgt[0] - listHeihgt[1]就是划到第一个group所处纵轴的范围
+         */
         this.listHeight.push(height)
       }
     },

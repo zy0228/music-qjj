@@ -81,6 +81,12 @@ export default {
       })
 
       this.slide.on('scrollEnd', this._onScrollEnd)
+      /**
+       * mounted 执行autoPlay调用scroll的next
+       * 监听到scrollend后会调用_onScrollend
+       * _onScrollEnd 会更新当前的pageIndex值并且调用autoPaly
+       * 重复--执行
+       */
     },
     _onScrollEnd() {
       let pageIndex = this.slide.getCurrentPage().pageX
