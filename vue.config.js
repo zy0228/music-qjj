@@ -110,6 +110,25 @@ module.exports = {
           console.log(e)
         })
       })
+
+      /**
+       * 获取推荐歌曲集合列表
+       */
+      app.get('/getSongList', (req, res) => {
+        const url = 'https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg'
+
+        axios.get(url, {
+          headers: {
+            referer: 'https://y.qq.com/n/yqq/playsquare/${req.query.disstid}.htm',
+            orign: 'https://y.qq.com'
+          },
+          params: req.query
+        }).then((response) => {
+          res.json(response.data)
+        }).catch((e) => {
+          console.log(e)
+        })
+      })
     }
   }
 }

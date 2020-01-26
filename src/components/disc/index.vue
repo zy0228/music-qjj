@@ -1,18 +1,18 @@
 <template>
   <music-list
-    :songs="songs"
     :title="title"
     :bg-image="bgImage"
+    :songs="songs"
   >
   </music-list>
 </template>
 
 <script>
 import { ERR_OK } from 'api/config'
-import { getSingerDetail } from 'api/singer'
-import { mapGetters } from 'vuex'
-import { createSong, getSongUrl } from 'common/js/song'
 import MusicList from 'components/music-list/music-list'
+import { mapGetters } from 'vuex'
+import { getSongList } from 'api/recommend'
+import { createSong, getSongUrl } from 'common/js/song'
 
 export default {
   data() {
@@ -22,25 +22,29 @@ export default {
   },
   computed: {
     title() {
-      return this.singer.name
+      return this.disc.dissname
     },
     bgImage() {
-      return this.singer.avatar
+      return this.disc.imgurl
     },
-    ...mapGetters(['singer'])
+    ...mapGetters([
+      'disc'
+    ])
   },
-  created () {
-    this._getDetail()
+  created() {
+    this._getSongList()
   },
   methods: {
-    _getDetail() {
-      if (!this.singer.id) {
-        this.$router.push('/singer')
+    _getSongList() {
+      if (!this.disc.dissid) {
+        this.$router.push({
+          path: '/recommend'
+        })
         return
       }
-      getSingerDetail(this.singer.id).then(res => {
+      getSongList(this.disc.dissid).then(res => {
         if (res.code === ERR_OK) {
-          this._normalizeSongs(res.data.list).then(songs => {
+          this._normalizeSongs(res.cdlist[0].songlist).then(songs => {
             this.songs = songs
           })
         }
@@ -48,10 +52,7 @@ export default {
     },
     _normalizeSongs(list) {
       let ret = []
-
-      list.forEach((item, index) => {
-        let { musicData } = item
-
+      list.forEach((musicData) => {
         if (musicData.songid && musicData.albummid) {
           ret.push(createSong(musicData))
         }
@@ -71,4 +72,6 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+@import '~common/stylus/variable'
+@import '~common/stylus/mixin'
 </style>

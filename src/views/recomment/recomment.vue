@@ -21,7 +21,7 @@
         <div class="recommend-list">
           <h1 class="list-title">热门歌单推荐</h1>
           <ul>
-            <li class="item" v-for="(item, index) in discList" :key="index">
+            <li class="item" @click="selectItem(item)" v-for="(item, index) in discList" :key="index">
               <div class="icon">
                 <img width="60" height="60" v-lazy="item.imgurl" alt="">
               </div>
@@ -37,6 +37,9 @@
         <loading></loading>
       </div>
     </scroll>
+    <transition name="slide">
+      <router-view></router-view>
+    </transition>
   </div>
 </template>
 
@@ -47,6 +50,7 @@ import Slide from 'base/slide/slide'
 import Scroll from 'base/scroll/scroll'
 import Loading from 'base/loading/loading'
 import { playlistMixin } from 'common/js/mixin'
+import { mapMutations } from 'vuex'
 
 export default {
   mixins: [playlistMixin],
@@ -65,6 +69,12 @@ export default {
       this.$refs.recommend.style['bottom'] = bottom
       this.$refs.scroll.refresh()
     },
+    selectItem(item) {
+      this.$router.push({
+        path: `/recommend/${item.dissid}`
+      })
+      this.setDisc(item)
+    },
     _getRecommend() {
       getDiscList().then(res => {
         if (res.code === ERR_OK) {
@@ -82,7 +92,10 @@ export default {
         this.$refs.scroll.refresh()
         this.checkLoad = true
       }
-    }
+    },
+    ...mapMutations({
+      'setDisc': 'SET_DISC'
+    })
   },
   components: {
     Slide,
@@ -100,6 +113,10 @@ export default {
   width : 100%
   top: 88px
   bottom: 0
+  .slide-enter-active, .slide-leave-active
+    transition all .3s
+  .slide-enter, .slide-leave-to
+    transform translate3d(100%, 0, 0)
   .recommend-content
     height: 100%
     overflow: hidden

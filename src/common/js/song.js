@@ -1,6 +1,7 @@
 import getLyric from 'api/getLyric'
 import { ERR_OK } from 'api/config'
 import { Base64 } from 'js-base64'
+import getSongVkey from 'api/song-vkey'
 
 export default class Song {
   constructor({ id, mid, singer, name, type, album, duration, image, url }) {
@@ -26,7 +27,7 @@ export default class Song {
           this.lyric = Base64.decode(res.lyric)
           resolve(this.lyric)
         } else {
-          reject('err lyric')
+          reject(new Error('error lyric'))
         }
       })
     })
@@ -56,4 +57,28 @@ function filterSinger(singer) {
     ret.push(s.name)
   })
   return ret.join('/')
+}
+
+export function getSongUrl(songsList) {
+  let midMap = songsList.reduce((acc, cur) => acc.concat(cur.mid), [])
+  let typeMap = songsList.reduce((acc, cur) => acc.concat(cur.type), [])
+
+  return getSongVkey(midMap, typeMap).then(res => {
+    let keyMap = []
+    let ret = []
+    let { midurlinfo } = res.data
+
+    midurlinfo.forEach((item, index) => {
+      keyMap.push(item.purl)
+    })
+
+    keyMap.forEach((key, index) => {
+      if (key) {
+        songsList[index].url = key
+        ret.push(songsList[index])
+      }
+    })
+
+    return Promise.resolve(ret)
+  })
 }

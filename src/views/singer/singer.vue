@@ -7,7 +7,7 @@
     >
     </list-view>
     <transition name="slide">
-        <router-view></router-view>
+      <router-view></router-view>
     </transition>
   </div>
 </template>
