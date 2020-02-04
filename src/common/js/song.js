@@ -82,3 +82,18 @@ export function getSongUrl(songsList) {
     return Promise.resolve(ret)
   })
 }
+
+export function _normalizeSongs(list) {
+  let ret = []
+  list.forEach((musicData) => {
+    if (musicData.songid && musicData.albummid) {
+      ret.push(createSong(musicData))
+    }
+  })
+
+  return new Promise((resolve, reject) => {
+    getSongUrl(ret).then(songs => {
+      resolve(songs)
+    })
+  })
+}

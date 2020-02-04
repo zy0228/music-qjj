@@ -11,7 +11,7 @@
 import { ERR_OK } from 'api/config'
 import { getSingerDetail } from 'api/singer'
 import { mapGetters } from 'vuex'
-import { createSong, getSongUrl } from 'common/js/song'
+import { _normalizeSongs } from 'common/js/song'
 import MusicList from 'components/music-list/music-list'
 
 export default {
@@ -40,27 +40,11 @@ export default {
       }
       getSingerDetail(this.singer.id).then(res => {
         if (res.code === ERR_OK) {
-          this._normalizeSongs(res.data.list).then(songs => {
+          let data = res.data.list.map(item => item.musicData)
+          _normalizeSongs(data).then(songs => {
             this.songs = songs
           })
         }
-      })
-    },
-    _normalizeSongs(list) {
-      let ret = []
-
-      list.forEach((item, index) => {
-        let { musicData } = item
-
-        if (musicData.songid && musicData.albummid) {
-          ret.push(createSong(musicData))
-        }
-      })
-
-      return new Promise((resolve, reject) => {
-        getSongUrl(ret).then(songs => {
-          resolve(songs)
-        })
       })
     }
   },

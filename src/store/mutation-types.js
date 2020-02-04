@@ -15,3 +15,5 @@ export const SET_CURRENT_INDEX = 'SET_CURRENT_INDEX'
 export const SET_SONG_URL = 'SET_SONG_URL'
 
 export const SET_DISC = 'SET_DISC'
+
+export const SET_TOPLIST = 'SET_TOPLIST'
