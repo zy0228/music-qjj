@@ -38,7 +38,7 @@ export function createSong(musicData) {
   return new Song({
     id: musicData.songid,
     mid: musicData.songmid,
-    type: musicData.songtype,
+    type: musicData.songtype || musicData.type,
     singer: filterSinger(musicData.singer),
     url: musicData.url,
     name: musicData.songname,
@@ -48,7 +48,7 @@ export function createSong(musicData) {
   })
 }
 
-function filterSinger(singer) {
+export function filterSinger(singer) {
   let ret = []
   if (!singer) {
     return ''
@@ -59,7 +59,22 @@ function filterSinger(singer) {
   return ret.join('/')
 }
 
-export function getSongUrl(songsList) {
+export function _normalizeSongs(list) {
+  let ret = []
+  list.forEach((musicData) => {
+    if (musicData.songid && musicData.albummid) {
+      ret.push(createSong(musicData))
+    }
+  })
+
+  return new Promise((resolve, reject) => {
+    getSongUrl(ret).then(songs => {
+      resolve(songs)
+    })
+  })
+}
+
+function getSongUrl(songsList) {
   let midMap = songsList.reduce((acc, cur) => acc.concat(cur.mid), [])
   let typeMap = songsList.reduce((acc, cur) => acc.concat(cur.type), [])
 
@@ -80,20 +95,5 @@ export function getSongUrl(songsList) {
     })
 
     return Promise.resolve(ret)
-  })
-}
-
-export function _normalizeSongs(list) {
-  let ret = []
-  list.forEach((musicData) => {
-    if (musicData.songid && musicData.albummid) {
-      ret.push(createSong(musicData))
-    }
-  })
-
-  return new Promise((resolve, reject) => {
-    getSongUrl(ret).then(songs => {
-      resolve(songs)
-    })
   })
 }

@@ -129,6 +129,26 @@ module.exports = {
           console.log(e)
         })
       })
+
+      /**
+       * @return 搜索
+       */
+      app.get('/search', (req, res) => {
+        const url = 'http://ustbhuangyi.com/music/api/search'
+
+        axios.get(url, {
+          headers: {
+            referer: 'http://ustbhuangyi.com/music/',
+            orign: 'https://y.qq.com',
+            Host: 'ustbhuangyi.com'
+          },
+          params: req.query
+        }).then((response => {
+          res.json(response.data)
+        })).catch((e) => {
+          console.log(e)
+        })
+      })
     }
   }
 }
