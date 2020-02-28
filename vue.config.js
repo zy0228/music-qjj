@@ -34,6 +34,9 @@ module.exports = {
   },
 
   devServer: {
+    host: '0.0.0.0',
+    port: 8080,
+    hotOnly: false,
     before(app) {
       app.get('/getDiscList', (req, res) => {
         let url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg'

@@ -3,7 +3,9 @@
     class="suggest"
     :data="result"
     :pullup="pullup"
+    :beforeScroll="beforeScroll"
     @scroll-end="searchMore"
+    @beforeScroll="listScroll"
     ref="suggest"
   >
     <ul class="suggest-list">
@@ -17,17 +19,21 @@
       </li>
       <Loading v-show="hasMore" title=""></Loading>
     </ul>
+    <div v-show="!hasMore && !result.length" class="no-result-wrapper">
+      <no-result title="抱歉，暂无更多"></no-result>
+    </div>
   </Scroll>
 </template>
 
 <script>
-import { mapMutations } from 'vuex'
+import { mapMutations, mapActions } from 'vuex'
 import { search } from 'api/search'
 import { ERR_OK } from 'api/config'
 import { _normalizeSongs } from 'common/js/song'
 import Singer from 'common/js/singer'
 import Scroll from 'base/scroll/scroll'
 import Loading from 'base/loading/loading'
+import NoResult from 'base/no-result/no-result'
 
 const TYPE_SINGER = 'singer'
 const perpage = 20
@@ -48,8 +54,9 @@ export default {
       page: 1,
       result: [],
       pullup: true,
-      hasMore: true,
-      perpage: 20
+      hasMore: false,
+      perpage: 20,
+      beforeScroll: true
     }
   },
   methods: {
@@ -60,6 +67,11 @@ export default {
       this.$refs.suggest.scrollTo(0, 0)
       search(this.query, this.page, this.showSinger, perpage).then(result => {
         if (result.code === ERR_OK) {
+          if (!result.data.song.list.length) {
+            this.result = []
+            this.hasMore = false
+            return
+          }
           this._genresult(result.data).then(res => {
             this.result = res
             this._checkHasMore(result.data)
@@ -77,7 +89,14 @@ export default {
           path: `/search/${singer.id}`
         })
         this.setSinger(singer)
+      } else {
+        this.insertSong(item)
       }
+
+      this.$emit('select')
+    },
+    listScroll() {
+      this.$emit('list-scroll')
     },
     async _genresult(data) {
       let ret = []
@@ -105,6 +124,9 @@ export default {
         }
       })
     },
+    refresh() {
+      this.$refs.suggest.refresh()
+    },
     getIconCls(item) {
       if (item.type === TYPE_SINGER) {
         return 'icon-mine'
@@ -123,11 +145,16 @@ export default {
       const song = data.song
       if (!song.list.length || (song.curnum + song.curpage * perpage) > song.totalnum) {
         this.hasMore = false
+      } else if (this.result.length < perpage) {
+        this.searchMore()
       }
     },
     ...mapMutations({
       setSinger: 'SET_SINGER'
-    })
+    }),
+    ...mapActions([
+      'insertSong'
+    ])
   },
   watch: {
     query(newQuery) {
@@ -139,7 +166,8 @@ export default {
   },
   components: {
     Scroll,
-    Loading
+    Loading,
+    NoResult
   }
 }
 </script>
@@ -169,7 +197,7 @@ export default {
       color $color-text-d
       overflow hidden
       .text
-        no-warp()
+        no-wrap()
   .no-result-wrapper
     position absolute
     width 100%
