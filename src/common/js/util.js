@@ -1,10 +1,8 @@
-const CircularJSON = require('circular-json-es6')
-
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
 export function shuffle(arr) {
-  let arrs = CircularJSON.parse(CircularJSON.stringify(arr))
+  let arrs = arr.slice()
   for (let i = 0; i < arrs.length; i++) {
     let j = getRandomInt(0, i)
     let t = arrs[i]
@@ -17,7 +15,7 @@ export function shuffle(arr) {
 // 防抖函数
 export function debounce(func, delay) {
   let timer
-  
+
   return function(...arg) {
     if (timer) clearTimeout(timer)
 

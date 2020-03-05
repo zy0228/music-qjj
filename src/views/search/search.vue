@@ -4,7 +4,7 @@
       <search-box ref="searchBox" @on-query="onQuqeryChange"></search-box>
     </div>
     <div ref="shortcutWrapper" class="shortcut-wrapper" v-show="!query">
-      <scroll class="shortcut" ref="shortcut" :data="shortcut">
+      <scroll :refreshDelay="refreshDelay" class="shortcut" ref="shortcut" :data="shortcut">
         <div>
           <div class="hot-key">
             <h1 class="title">热门搜索</h1>
@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapActions } from 'vuex'
 import SearchBox from 'base/SearchBox'
 import SearchList from 'base/search-list/search-list'
 import Suggest from 'components/suggest/suggest'
@@ -53,20 +53,16 @@ import { hotSearch } from 'api/search'
 import { ERR_OK } from 'api/config'
 import Scroll from 'base/scroll/scroll'
 import BaseConfirm from 'base/confirm/confirm'
-import { playlistMixin } from 'common/js/mixin'
+import { playlistMixin, searchMixin } from 'common/js/mixin'
 
 export default {
   data() {
     return {
-      hotKey: [],
-      query: ''
+      hotKey: []
     }
   },
-  mixins: [playlistMixin],
+  mixins: [playlistMixin, searchMixin],
   computed: {
-    ...mapGetters([
-      'searchHistory'
-    ]),
     shortcut() {
       return this.hotKey.concat(this.searchHistory)
     }
@@ -83,9 +79,6 @@ export default {
       this.$refs.searchResult.style.bottom = bottom
       this.$refs.suggest.refresh()
     },
-    addQuery(query) {
-      this.$refs.searchBox.setQuery(query)
-    },
     _getHotSearch() {
       hotSearch().then(res => {
         if (res.code === ERR_OK) {
@@ -93,22 +86,10 @@ export default {
         }
       })
     },
-    onQuqeryChange(query) {
-      this.query = query
-    },
-    blurInput() {
-      this.$refs.searchBox.blur()
-    },
-    saveSearch() {
-      // TODO: 储存到本地storage、vuex中
-      this.saveStorage(this.query)
-    },
     showConfirm() {
       this.$refs.confirm.show()
     },
     ...mapActions([
-      'saveStorage',
-      'deleteStorage',
       'clearSearch'
     ])
   },

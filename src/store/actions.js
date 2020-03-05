@@ -1,7 +1,7 @@
 import * as types from './mutation-types'
 import { shuffle } from 'common/js/util'
 import { playMode } from 'common/js/config'
-import { saveSearch, deleteSearch, removeSearch } from 'common/js/cache'
+import { saveSearch, deleteSearch, removeSearch, savePlay } from 'common/js/cache'
 const CircularJSON = require('circular-json-es6')
 
 function getCurrentIndx(list, song) {
@@ -26,7 +26,7 @@ export function selectPlay({ commit, state }, { list, index }) {
   commit(types.SET_PLAYING_STATE, true)
 }
 
-export function setlePlayRandom({ commit }, { list }) {
+export function selectPlayRandom({ commit }, { list }) {
   commit(types.SET_PLAY_MODE, playMode.random)
   commit(types.SET_SEQUENCELIST, list)
   let randomList = shuffle(list)
@@ -94,4 +94,38 @@ export function deleteStorage({ commit }, query) {
 
 export function clearSearch({ commit }) {
   commit(types.SET_SEARCH_HISTORY, removeSearch())
+}
+
+export const deleteSong = ({ commit, state }, song) => {
+  let playlist = state.playList.slice()
+  let sequencelist = state.sequenceList.slice()
+  let currentIndex = state.currentIndex
+
+  let pIndex = playlist.findIndex(item => song.id === item.id)
+  playlist.splice(pIndex, 1)
+  let sIndex = sequencelist.findIndex(item => song.id === item.id)
+  sequencelist.splice(sIndex, 1)
+
+  if (currentIndex > pIndex || currentIndex === playlist.length) {
+    currentIndex--
+  }
+
+  commit(types.SET_PLAYLIST, playlist)
+  commit(types.SET_SEQUENCELIST, sequencelist)
+  commit(types.SET_CURRENT_INDEX, currentIndex)
+
+  let playState = playlist.length > 0
+
+  commit(types.SET_PLAYING_STATE, playState)
+}
+
+export const deleteSongList = ({ commit }) => {
+  commit(types.SET_PLAYLIST, [])
+  commit(types.SET_SEQUENCELIST, [])
+  commit(types.SET_CURRENT_INDEX, -1)
+  commit(types.SET_PLAYING_STATE, false)
+}
+
+export const savePlayHistory = ({ commit }, song) => {
+  commit(types.SET_PLAY_HISTORY, savePlay(song))
 }

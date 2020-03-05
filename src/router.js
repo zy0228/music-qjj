@@ -7,6 +7,7 @@ import Recomment from 'views/recomment/recomment'
 import SingerDeatil from 'components/singer-detail/singer-detail'
 import Disc from 'components/disc'
 import TopList from 'components/top-list'
+import UserCenter from 'components/user-center/user-center'
 
 Vue.use(Router)
 
@@ -15,6 +16,10 @@ export default new Router({
     {
       path: '/',
       redirect: '/recommend'
+    },
+    {
+      path: '/user',
+      component: UserCenter
     },
     {
       path: '/recommend',

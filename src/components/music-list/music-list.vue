@@ -102,13 +102,13 @@ export default {
       })
     },
     random() {
-      this.setlePlayRandom({
+      this.selectPlayRandom({
         list: this.songs
       })
     },
     ...mapActions([
       'selectPlay',
-      'setlePlayRandom'
+      'selectPlayRandom'
     ])
   },
   watch: {

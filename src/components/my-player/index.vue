@@ -21,7 +21,7 @@
           class="middle"
           @touchstart.prevent="middleTouchStart"
           @touchmove.prevent="middleTouchMove"
-          @touchend.prevent="middleTouchEnd">
+          @touchend="middleTouchEnd">
           <div class="middle-l" ref="middleL">
             <div class="cd-wrapper" ref="cdWrapper">
               <div class="cd">
@@ -97,23 +97,25 @@
           </progress-circle>
         </div>
         <div class="control">
-          <i class="icon-playlist"></i>
+          <i class="icon-playlist" @click.stop="showPlayList"></i>
         </div>
       </div>
     </transition>
+    <play-list ref="playList"></play-list>
     <audio :src="currentSong.url" ref="audio" @canplay="canPlay" @error="error" @timeupdate="timeUpadate" @ended="endPlay"></audio>
   </div>
 </template>
 
 <script>
-import { shuffle } from 'common/js/util'
 import { prefixStyle } from 'common/js/dom'
 import { playMode } from 'common/js/config'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 import ProgressBar from 'components/progress-bar'
 import ProgressCircle from 'components/progress-circle'
 import Lyric from 'lyric-parser'
+import PlayList from 'components/playlist/playlist'
 import Scroll from 'base/scroll/scroll'
+import { playMixin } from 'common/js/mixin'
 
 const transform = prefixStyle('transform')
 const transformCssProp = transform.replace(/(.*)Transform/, '-$1-transform')
@@ -121,6 +123,7 @@ const transition = prefixStyle('transition')
 const transitionDuration = prefixStyle('transitionDuration')
 
 export default {
+  mixins: [playMixin],
   data() {
     return {
       songReady: false,
@@ -148,17 +151,10 @@ export default {
     percent() {
       return this.currentTime / this.currentSong.duration
     },
-    iconMode() {
-      return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
-    },
     ...mapGetters([
       'fullScreen',
-      'playList',
-      'currentSong',
       'playing',
-      'currentIndex',
-      'mode',
-      'sequenceList'
+      'currentIndex'
     ])
   },
   created() {
@@ -261,6 +257,7 @@ export default {
     },
     canPlay() {
       this.songReady = true
+      this.savePlayHistory(this.currentSong)
     },
     error() {
       this.songReady = true
@@ -295,41 +292,46 @@ export default {
         this.togglePlay()
       }
     },
-    changeMode() {
-      const mode = (this.mode + 1) % 3
-      this.setPlayMode(mode)
-      let list = []
-      if (mode === playMode.random) {
-        list = shuffle(this.sequenceList)
-      } else {
-        list = this.sequenceList
-      }
-      this.setCurrentIndex(this.resetCurrentIndex(list))
-      this.setPlayList(list)
-    },
-    resetCurrentIndex(list) {
-      let index = list.findIndex(song => {
-        return song.id === this.currentSong.id
-      })
-      return index
+    showPlayList() {
+      this.$refs.playList.show()
     },
     middleTouchStart(e) {
-      this.touch.inital = true
+      this.touch.initalted = true
+      this.touch.directionLocked = ''
+      // 用来判断是否第一次移动
+      this.touch.moved = false
       const touch = e.touches[0]
       this.touch.startX = touch.pageX
       this.touch.startY = touch.pageY
     },
     middleTouchMove(e) {
-      if (!this.touch.inital) {
+      if (!this.touch.initalted) {
         return
       }
 
       const touch = e.touches[0]
       const deltaX = touch.pageX - this.touch.startX
       const deltaY = touch.pageY - this.touch.startY
-      if (Math.abs(deltaY) > Math.abs(deltaX)) {
+
+      const absDeltaX = Math.abs(deltaX)
+      const absDeltaY = Math.abs(deltaY)
+
+      if (!this.touch.directionLocked) {
+        if (absDeltaX > absDeltaY) {
+          this.touch.directionLocked = 'h' // lock horizontally
+        } else if (absDeltaY >= absDeltaX) {
+          this.touch.directionLocked = 'v' // lock vertically
+        }
+      }
+
+      if (this.touch.directionLocked === 'v') {
         return
       }
+
+      if (!this.touch.moved) {
+        this.touch.moved = true
+      }
+
       const left = this.currentShow === 'cd' ? 0 : -window.innerWidth
       const offsetWidth = Math.min(0, Math.max(-window.innerWidth, left + deltaX))
       this.touch.percent = Math.abs(offsetWidth / window.innerWidth)
@@ -339,6 +341,10 @@ export default {
       this.$refs.middleL.style[transitionDuration] = 0
     },
     middleTouchEnd() {
+      if (!this.touch.moved) {
+        return
+      }
+
       let offsetWidth
       let opacity
       let time = 300
@@ -365,6 +371,7 @@ export default {
       this.$refs.lyricList.$el.style[transitionDuration] = `${time}ms`
       this.$refs.middleL.style.opacity = opacity
       this.$refs.middleL.style[transitionDuration] = `${time}ms`
+      this.touch.initalted = false
     },
     format(interval) {
       interval = interval | 0
@@ -422,15 +429,18 @@ export default {
       this.playingLyric = txt
     },
     ...mapMutations({
-      setFullScreen: 'SET_FULL_SCREEN',
-      setPlayingState: 'SET_PLAYING_STATE',
-      setCurrentIndex: 'SET_CURRENT_INDEX',
-      setPlayMode: 'SET_PLAY_MODE',
-      setPlayList: 'SET_PLAYLIST'
-    })
+      setFullScreen: 'SET_FULL_SCREEN'
+    }),
+    ...mapActions([
+      'savePlayHistory'
+    ])
   },
   watch: {
     currentSong(newSong, oldSong) {
+      if (!newSong.id) {
+        return
+      }
+
       if (newSong.id === oldSong.id) {
         return
       }
@@ -454,7 +464,8 @@ export default {
   components: {
     ProgressBar,
     ProgressCircle,
-    Scroll
+    Scroll,
+    PlayList
   }
 }
 </script>
@@ -540,6 +551,7 @@ export default {
               width: 100%
               height: 100%
               border-radius: 50%
+              border: 10px solid hsla(0,0%,100%,.1);
               &.play
                 animation: rotate 10s linear infinite
               &.pause
