@@ -3,11 +3,14 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-import './cube-ui'
 import fastclick from 'fastclick'
 import VueLazyLoad from 'vue-lazyload'
 
 import 'common/stylus/index.styl'
+
+import VConsole from 'vconsole'
+/* eslint-disable no-unused-vars */
+// var vconsole = new VConsole()
 
 Vue.config.productionTip = false
 

@@ -15,30 +15,9 @@ module.exports = {
       .set('base', resolve('src/base'))
   },
 
-  css: {
-    loaderOptions: {
-      stylus: {
-        'resolve url': true,
-        'import': [
-          './src/theme'
-        ]
-      }
-    }
-  },
-
-  pluginOptions: {
-    'cube-ui': {
-      postCompile: true,
-      theme: true
-    }
-  },
-
   devServer: {
-    host: '0.0.0.0',
-    port: 8080,
-    hotOnly: false,
     before(app) {
-      app.get('/getDiscList', (req, res) => {
+      app.get('/api/getDiscList', (req, res) => {
         let url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg'
 
         axios.get(url, {
@@ -54,7 +33,7 @@ module.exports = {
         })
       })
 
-      app.get('/getSingers', (req, res) => {
+      app.get('/api/getSingers', (req, res) => {
         let url = 'https://c.y.qq.com/v8/fcg-bin/v8.fcg'
 
         axios.get(url, {
@@ -74,7 +53,7 @@ module.exports = {
        * 获取vkey
        * 抓的黄老的接口，嘿嘿
        */
-      app.get('/getVkey', (req, res) => {
+      app.get('/api/getVkey', (req, res) => {
         let url = 'http://ustbhuangyi.com/music/api/getPurlUrl'
         let request = req.query
         let formatParams = {}
@@ -98,7 +77,7 @@ module.exports = {
       /**
        * 获取歌词
        */
-      app.get('/getLyric', (req, res) => {
+      app.get('/api/getLyric', (req, res) => {
         let url = 'http://ustbhuangyi.com/music/api/lyric'
 
         axios.get(url, {
@@ -117,7 +96,7 @@ module.exports = {
       /**
        * 获取推荐歌曲集合列表
        */
-      app.get('/getSongList', (req, res) => {
+      app.get('/api/getSongList', (req, res) => {
         const url = 'https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg'
 
         axios.get(url, {
@@ -136,7 +115,7 @@ module.exports = {
       /**
        * @return 搜索
        */
-      app.get('/search', (req, res) => {
+      app.get('/api/search', (req, res) => {
         const url = 'http://ustbhuangyi.com/music/api/search'
 
         axios.get(url, {

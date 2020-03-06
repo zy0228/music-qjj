@@ -3,7 +3,7 @@ import jsonp from 'common/js/jsonp'
 import axios from 'axios'
 
 export function getSingerList () {
-  let url = '/getSingers'
+  let url = '/api/getSingers'
 
   let data = Object.assign({}, commonParams, {
     pagenum: 1,

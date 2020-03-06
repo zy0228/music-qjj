@@ -16,7 +16,7 @@ export function hotSearch() {
 }
 
 export function search(query, page, zhidao, perpage) {
-  const url = '/search'
+  const url = '/api/search'
 
   const data = Object.assign({}, commonParams, {
     w: query,

@@ -191,7 +191,7 @@ export default {
 
 </script>
 <style lang='stylus' scoped>
-@import "common/stylus/variable"
+@import "~common/stylus/variable"
 
   .listview
     position: relative

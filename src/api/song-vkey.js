@@ -8,7 +8,7 @@ export default function getSongVkey(songmid, songtype) {
     needNewCode: 1
   })
 
-  return axios.get('/getVkey', {
+  return axios.get('/api/getVkey', {
     params: {
       comm: data,
       req_0: {

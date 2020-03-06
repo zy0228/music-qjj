@@ -2,7 +2,7 @@ import { commonParams } from './config'
 import axios from 'axios'
 
 export default function getLyricData(mid) {
-  const url = '/getLyric'
+  const url = '/api/getLyric'
 
   const params = Object.assign({}, commonParams, {
     songmid: mid,
