@@ -1,6 +1,6 @@
 import jsonp from 'common/js/jsonp'
 import axios from 'axios'
-import { commonParams, options } from './config'
+import { commonParams, options, baseUrl } from './config'
 
 export function hotSearch() {
   const url = 'https://c.y.qq.com/splcloud/fcgi-bin/gethotkey.fcg'
@@ -16,7 +16,7 @@ export function hotSearch() {
 }
 
 export function search(query, page, zhidao, perpage) {
-  const url = '/api/search'
+  const url = `${baseUrl}api/search`
 
   const data = Object.assign({}, commonParams, {
     w: query,

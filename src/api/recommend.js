@@ -1,5 +1,5 @@
 import jsonp from 'common/js/jsonp'
-import { commonParams, options } from './config'
+import { commonParams, options, baseUrl } from './config'
 import axios from 'axios'
 
 export function getRecommend() {
@@ -14,7 +14,7 @@ export function getRecommend() {
 }
 
 export function getDiscList() {
-  const url = '/api/getDiscList'
+  const url = `${baseUrl}api/getDiscList`
   let data = Object.assign({}, commonParams, {
     picmid: 1,
     rnd: Math.random(),
@@ -36,7 +36,7 @@ export function getDiscList() {
 }
 
 export function getSongList(disstid) {
-  const url = '/api/getSongList'
+  const url = `${baseUrl}api/getSongList`
   let data = Object.assign({}, commonParams, {
     platform: 'yqq',
     needNewCode: 0,

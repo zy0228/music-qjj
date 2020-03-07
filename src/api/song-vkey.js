@@ -1,4 +1,4 @@
-import { commonParams, ERR_OK } from './config.js'
+import { commonParams, ERR_OK, baseUrl } from './config.js'
 import axios from 'axios'
 
 export default function getSongVkey(songmid, songtype) {
@@ -8,7 +8,7 @@ export default function getSongVkey(songmid, songtype) {
     needNewCode: 1
   })
 
-  return axios.get('/api/getVkey', {
+  return axios.get(`${baseUrl}api/getVkey`, {
     params: {
       comm: data,
       req_0: {

@@ -1,8 +1,8 @@
-import { commonParams } from './config'
+import { commonParams, baseUrl } from './config'
 import axios from 'axios'
 
 export default function getLyricData(mid) {
-  const url = '/api/getLyric'
+  const url = `${baseUrl}api/getLyric`
 
   const params = Object.assign({}, commonParams, {
     songmid: mid,

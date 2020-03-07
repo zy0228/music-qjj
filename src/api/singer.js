@@ -1,9 +1,9 @@
-import { commonParams, singerType, options } from './config'
+import { commonParams, singerType, options, baseUrl } from './config'
 import jsonp from 'common/js/jsonp'
 import axios from 'axios'
 
 export function getSingerList () {
-  let url = '/api/getSingers'
+  let url = `${baseUrl}api/getSingers`
 
   let data = Object.assign({}, commonParams, {
     pagenum: 1,

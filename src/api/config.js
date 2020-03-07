@@ -15,3 +15,10 @@ export const ERR_OK = 0
 export const singerType = {
   key: 'all_all_all'
 }
+
+const urlMap = {
+  development: '/',
+  production: 'http://zyqjj.top/music/'
+}
+
+export const baseUrl = urlMap[process.env.NODE_ENV]
