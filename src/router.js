@@ -12,6 +12,7 @@ const UserCenter = () => import('components/user-center/user-center')
 Vue.use(Router)
 
 export default new Router({
+  mode: 'hash',
   routes: [
     {
       path: '/',
